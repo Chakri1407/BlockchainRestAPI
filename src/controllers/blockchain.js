@@ -73,12 +73,7 @@ const mineBlock = async (req, res) => {
     tx.status = 'confirmed';
     tx.blockId = block._id;
     await tx.save();
-    const fromWallet = await Wallet.findOne({ address: tx.fromWallet });
-    const toWallet = await Wallet.findOne({ address: tx.toWallet });
-    fromWallet.balance -= (tx.amount + tx.fee);
-    toWallet.balance += tx.amount;
-    await fromWallet.save();
-    await toWallet.save();
+    // Removed wallet balance updates since getBalance calculates dynamically
   }
 
   res.json({ success: true, data: block });

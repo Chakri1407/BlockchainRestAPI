@@ -17,9 +17,33 @@ const createTransaction = async (req, res) => {
   if (!fromWallet || fromWallet.userId.toString() !== req.user.id) {
     return res.status(403).json({ error: 'Invalid wallet' });
   }
-  if (fromWallet.balance < amount + 0.01) {
+
+  // Calculate balance dynamically from transactions
+  const transactions = await Transaction.find({
+    $or: [
+      { fromWallet: fromWallet.address },
+      { toWallet: fromWallet.address }
+    ],
+    status: 'confirmed'
+  });
+  console.log('Transactions for balance calculation:', transactions); // Debug log
+  const balance = transactions.reduce((acc, tx) => {
+    const txAmount = Number(tx.amount);
+    if (isNaN(txAmount)) {
+      console.error('Invalid amount in transaction:', tx);
+      return acc;
+    }
+    if (tx.toWallet === fromWallet.address) return acc + txAmount;
+    if (tx.fromWallet === fromWallet.address) return acc - txAmount;
+    return acc;
+  }, 0);
+  console.log('Calculated balance:', balance); // Debug log
+
+  const totalCost = amount + 0.01; // Amount + fee
+  if (balance < totalCost) {
     return res.status(400).json({ error: 'Insufficient balance' });
   }
+
   if (!(await Wallet.findOne({ address: toWallet }))) {
     return res.status(400).json({ error: 'Recipient wallet not found' });
   }

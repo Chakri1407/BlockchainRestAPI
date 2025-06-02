@@ -1,3 +1,4 @@
+require('dotenv').config(); // Load environment variables from .env file
 const mongoose = require('mongoose');
 const User = require('./models/User');
 const Wallet = require('./models/Wallet');

@@ -15,7 +15,7 @@ const blockSchema = new mongoose.Schema({
 
 blockSchema.statics.calculateMerkleRoot = function(transactions) {
   if (!transactions.length) return '';
-  const hashes = transactions.map(tx => tx.hash);
+  let hashes = transactions.map(tx => tx.hash); // Changed 'const' to 'let'
   while (hashes.length > 1) {
     const newLevel = [];
     for (let i = 0; i < hashes.length; i += 2) {
