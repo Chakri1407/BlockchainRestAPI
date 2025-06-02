@@ -9,10 +9,11 @@ describe('Transaction API', () => {
   let user1AccessToken, user2AccessToken;
   let user1Id, user2Id;
   let wallet1Id, wallet2Id, wallet1Address, wallet2Address;
+  let server;
 
-  beforeAll(async counter = 0;
-  async () => {
-    await mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+  beforeAll(async () => {
+    await mongoose.connect(process.env.MONGODB_URI);
+    server = app.listen(0); // Use port 0 to let the OS assign an available port
   });
 
   beforeEach(async () => {
@@ -24,7 +25,7 @@ describe('Transaction API', () => {
     const user1Res = await request(app)
       .post('/api/auth/register')
       .send({ username: 'user1', email: 'user1@example.com', password: 'password123', role: 'user' });
-    user1Id = user1Res.body.data.user.id;
+    user1Id = user1Res.body.data.id;
     const user1Login = await request(app)
       .post('/api/auth/login')
       .send({ email: 'user1@example.com', password: 'password123' });
@@ -34,7 +35,7 @@ describe('Transaction API', () => {
     const user2Res = await request(app)
       .post('/api/auth/register')
       .send({ username: 'user2', email: 'user2@example.com', password: 'password123', role: 'user' });
-    user2Id = user2Res.body.data.user.id;
+    user2Id = user2Res.body.data.id;
     const user2Login = await request(app)
       .post('/api/auth/login')
       .send({ email: 'user2@example.com', password: 'password123' });
@@ -63,6 +64,7 @@ describe('Transaction API', () => {
 
   afterAll(async () => {
     await mongoose.connection.close();
+    server.close();
   });
 
   describe('POST /api/transactions/:walletId', () => {
